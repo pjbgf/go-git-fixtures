@@ -9,14 +9,13 @@ import (
 	"testing"
 
 	"github.com/go-git/go-billy/v5"
-	"github.com/go-git/go-billy/v5/osfs"
+	"github.com/go-git/go-git-fixtures/v4/embedfs"
 	"github.com/go-git/go-git-fixtures/v4/internal/tgz"
 	"gopkg.in/check.v1"
 )
 
 var (
-	files      = make(map[string]string)
-	Filesystem = osfs.New(os.TempDir())
+	Filesystem = embedfs.New(data)
 )
 
 //go:embed data
@@ -229,30 +228,7 @@ func (f *Fixture) Is(tag string) bool {
 }
 
 func (f *Fixture) file(path string) (billy.File, error) {
-	if fpath, ok := files[path]; ok {
-		return Filesystem.Open(fpath)
-	}
-
-	bytes, err := data.ReadFile("data/" + path)
-	if err != nil {
-		return nil, err
-	}
-
-	file, err := Filesystem.TempFile("", "go-git-fixtures")
-	if err != nil {
-		return nil, err
-	}
-
-	if _, err := file.Write(bytes); err != nil {
-		return nil, err
-	}
-
-	if err := file.Close(); err != nil {
-		return nil, err
-	}
-
-	files[path] = file.Name()
-	return Filesystem.Open(file.Name())
+	return Filesystem.Open("data/" + path)
 }
 
 func (f *Fixture) Packfile() billy.File {
@@ -401,17 +377,13 @@ func (g Fixtures) Exclude(tag string) Fixtures {
 	return r
 }
 
-// Clean cleans all the temporal files created
+// Clean is now a no-op and should be removed on the next major release.
+// Deprecated as the fixtures no longer are saved on disk.
 func Clean() error {
-	for fname, f := range files {
-		if err := Filesystem.Remove(f); err != nil {
-			return err
-		}
-		delete(files, fname)
-	}
 	return nil
 }
 
+// Deprecated as Clean is no longer needed.
 type Suite struct{}
 
 // Deprecated as part of removing check from the code base.

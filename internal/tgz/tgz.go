@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/util"
+	"github.com/go-git/go-git-fixtures/v4/embedfs"
 )
 
 const (
@@ -27,7 +28,7 @@ const (
 // before the error and the temporal directory has not been created.
 // Otherwise, a non-empty string with the temporal directory holding
 // whatever information was extracted before the error is returned.
-func Extract(fs billy.Filesystem, tgz string) (d billy.Filesystem, err error, cleanup func()) {
+func Extract(fs embedfs.EmbedFS, tgz string) (d embedfs.EmbedFS, err error, cleanup func()) {
 	dirName := ""
 	cleanup = func() {
 		if dirName != "" {
@@ -74,7 +75,7 @@ func zipTarReader(r io.Reader) (*tar.Reader, error) {
 	return tar.NewReader(zip), nil
 }
 
-func unTar(fs billy.Filesystem, src *tar.Reader, dstPath string) error {
+func unTar(fs embedfs.EmbedFS, src *tar.Reader, dstPath string) error {
 	for {
 		header, err := src.Next()
 		if err != nil {
@@ -106,7 +107,7 @@ func unTar(fs billy.Filesystem, src *tar.Reader, dstPath string) error {
 	return nil
 }
 
-func makeFile(fs billy.Filesystem, path string, mode os.FileMode, contents io.Reader) (err error) {
+func makeFile(fs embedfs.EmbedFS, path string, mode os.FileMode, contents io.Reader) (err error) {
 	w, err := fs.Create(path)
 	if err != nil {
 		return err
